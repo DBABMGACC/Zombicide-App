@@ -6,9 +6,9 @@ let mission = missionType();
 let cure = cureAmount(5,15);
 
 console.log(`Your starting party is: ${party}\r\n
-            Your starting tiles are: ${tiles}\r\n
-            Your starting mission is: ${mission}\r\n
-            You need ${cure} objectives to find the cure!`);
+(Escape Applicable) Your starting tiles are: ${tiles}\r\n
+(Escape Applicable) Your starting mission is: ${mission}\r\n
+You need ${cure} objectives to find the cure!`);
 
 
 
@@ -36,11 +36,11 @@ function missionType(){
 
     switch(true){
 
-        case randomNum <= 30:
+        case randomNum <= 25:
             return "Search";
             break;
 
-        case (randomNum > 30 && randomNum <= 45):
+        case (randomNum > 25 && randomNum <= 45):
             return "Neutralize";
             break;
 
@@ -61,7 +61,7 @@ function missionType(){
             break;
 
         case (randomNum > 85):
-            return "Exit";
+            return "Escape";
             break;
 
         default: console.log("ERROR");
