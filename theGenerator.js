@@ -112,3 +112,24 @@ function missionType(){
         default: console.log("ERROR");
     }
 }
+
+function zombieCreator(){
+    let randomNum = (Math.floor(Math.random()*100) + 1);
+
+    switch(true){
+
+        case randomNum <= 60:
+            return `Walkers: ${(Math.floor(Math.random()*5))}`;
+            break;
+
+        case (randomNum > 60 && randomNum <= 85):
+            return `Fatties: ${(Math.floor(Math.random()*3))}`;
+            break;
+
+        case (randomNum > 85 && randomNum <= 100):
+            return `Runners: ${(Math.floor(Math.random()*2))}`;
+            break;
+
+        default: console.log("ERROR");
+    }
+}

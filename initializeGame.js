@@ -1,15 +1,40 @@
 const shuffle = require('shuffle-array');
 
-let party = startingParty(3);
-let tiles = startingTiles();
-let mission = missionType();
-let cure = cureAmount(3,6);
 
-console.log(`Your starting party is: ${party}\r\n
-(Escape Applicable) Your starting tiles are: ${tiles}\r\n
-(Escape Applicable) Your starting mission is: ${mission}\r\n
-You need ${cure} objectives to find the cure!`);
+detailGenerator()
+.then(detailObject => {
+    return initializeGame(detailObject)
+})
+.then(res => {
+    console.log(res);
+})
+.catch(err => {
+    console.log(err);
+})
 
+
+
+
+function detailGenerator(){
+   let detailObject = 
+        {
+            Party: startingParty(3),
+            Tiles: startingTiles(),
+            Mission: missionType(),
+            Cure: cureAmount(3,6)
+        }  
+    return detailObject;
+}
+
+
+
+
+function initializeGame(detailObject){
+return `Your starting party is: ${detailObject.Party}\r\n
+(Escape Applicable) Your starting tiles are: ${detailObject.Tiles}\r\n
+(Escape Applicable) Your starting mission is: ${detailObject.Mission}\r\n
+You need ${detailObject.Cure} objectives to find the cure!`
+}
 
 
 function startingTiles(){
