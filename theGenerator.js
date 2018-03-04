@@ -7,7 +7,7 @@ let myPath = generateEscapePath();
 console.log(myPath.join(""));
 
 
-// ADD RANDOMIZATION TO EACH TILE PIECE INFO UNDER TILEGENERATOR!!!!!!!!!
+
 // tileGenerator gets handed a mission path, then calls tileGrabber to grab the number of needed tiles, and pairs them together
 // by iterating over the length of the path
 function tileGenerator(missionPath){
@@ -21,7 +21,7 @@ function tileGenerator(missionPath){
 }
 
 // Reads the CSV containing all tile's info, and splits each tile into an object we are able to work with, all tile properties included
-function csvReader(){
+function tileInfo(){
     let finalArr = [];
     let testString = fs.readFileSync('./tileInfo.csv',"utf8");
     testString = testString.split("\r\n");
@@ -47,7 +47,7 @@ return finalArr;
 
 // tileGrabber gets handed a length, then shuffles and returns a number of random tiles equal to the length it was handed
 function tileGrabber(length){
-    let tileArray = csvReader();
+    let tileArray = tileInfo();
     return shuffle(tileArray).slice(0,length);
 }
 
@@ -73,8 +73,6 @@ function generateEscapePath(){
         return tileGenerator(missionPath);
     }
 }
-
-
 
 function missionType(){
     let randomNum = (Math.floor(Math.random()*100) + 1);
