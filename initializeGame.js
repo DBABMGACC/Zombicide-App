@@ -3,7 +3,7 @@ const shuffle = require('shuffle-array');
 let party = startingParty(3);
 let tiles = startingTiles();
 let mission = missionType();
-let cure = cureAmount(5,15);
+let cure = cureAmount(3,6);
 
 console.log(`Your starting party is: ${party}\r\n
 (Escape Applicable) Your starting tiles are: ${tiles}\r\n

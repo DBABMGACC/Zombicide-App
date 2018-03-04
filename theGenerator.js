@@ -3,7 +3,7 @@ const fs = require('fs');
 
 
 
-let myPath = escapePath();
+let myPath = generateEscapePath();
 console.log(myPath.join(""));
 
 
@@ -35,8 +35,10 @@ function csvReader(){
             {
                 Name: `${newArr[i][0]}`,
                 External: `${newArr[i][1]}`,
-                Internal: `${newArr[i][2]}`,
-                Rooms: `${newArr[i][3]}`
+                Spawn: `${newArr[i][2]}`,
+                Rooms: `${newArr[i][3]}`,
+                Orientation: `${Math.floor(Math.random()*4) + 1}`,
+                Zombies: `${zombieCreator()}`
             }
         )
     }
@@ -51,7 +53,7 @@ function tileGrabber(length){
 
 // Attempts to generate an escape mission path, if that path length is less than 3 or larger than 7, it generates a new path and pipes the
 // generated path to tileGenerator.
-function escapePath(){
+function generateEscapePath(){
     let missionPath = [];
     let mission = "";
     let missionCounter = 1;
@@ -65,7 +67,7 @@ function escapePath(){
     }
 
     if(missionPath.length > 7 || missionPath.length < 3){
-        return escapePath();
+        return generateEscapePath();
     }
     else{
         return tileGenerator(missionPath);
