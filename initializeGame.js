@@ -3,8 +3,10 @@ const promise = require('promise');
 const fs = require('fs');
 
 // Pseudo MainLine Logic
+let finalTileInfo = tileInfo();
+let openTiles = finalTileInfo;
 let detailObject = detailGenerator();
-let missionPath = generateEscapePath();
+let missionPath = generateEscapePath(detailObject,openTiles.slice());
 console.log(newGame(detailObject,missionPath));
 
 
@@ -25,9 +27,9 @@ function detailGenerator(){
 
 
 function newGame(detailObject,myPath){
-return `Your starting party is: ${detailObject.Party}\r\n
+return `Your starting party is: ${detailObject.Party.replace(/,/g, '')}\r\n
 Your starting tile is: ${detailObject.Tile}\r\n
-Your mission path is: ${missionPath}\r\n
+Your mission path is:\r\n${missionPath}\r\n
 You need ${detailObject.Cure} objectives to find the cure!`
 }
 
@@ -47,8 +49,18 @@ function startingParty(groupSize){
     let charArray = ["Josh","Wanda","Ned","Amy","Phil","Doug",
                     "Angry Mary","Red Cap Ben","Bones",
                     "Padre Johnson","Neema","Derek","Elsa","Raoul"];
+    let weapons = [];
+    let partyWithWeapons = [];
+    let party = shuffle(charArray).slice(0,size);
 
-    return shuffle(charArray).slice(0,size).join(", ");
+    for ( var i = 0; i < groupSize; i++){
+        weapons.push(weaponType());
+    }
+
+    for (var i= 0; i < groupSize; i++){
+        partyWithWeapons.push(`\r\n${party[i]} with a ${weapons[i]}`)
+    }
+    return partyWithWeapons.join(",");
 }
 
 function missionType(){
@@ -94,39 +106,29 @@ function cureAmount(min,max){
 
 // tileGenerator gets handed a mission path, then calls tileGrabber to grab the number of needed tiles, and pairs them together
 // by iterating over the length of the path
-function tileGenerator(missionPath){
+function tileGenerator(missionPath,openTiles){
     let joinedPath = [];
-    let pathTiles = tileGrabber((missionPath.length))
+    let pathTiles = tileGrabber((missionPath.length),openTiles)
 
     for (var i = 0; i < missionPath.length; i++){
-        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}\r\n`)
+        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Orientation: ${pathTiles[i].Orientation}, Zombies: ${pathTiles[i].Zombies}\r\n`);
     }
-    return joinedPath;
+    return joinedPath.join("");
 }
 
 // Reads the CSV containing all tile's info, and splits each tile into an object we are able to work with, all tile properties included
 function tileInfo(){
-    let finalArr = [];
-    let testString = fs.readFileSync('./tileInfo.csv',"utf8");
-    testString = testString.split("\r\n");
+    let ourCoin = ((Math.floor(Math.random()*100) + 1))
+    let tileInfo = "";
 
-    let newArr = testString.map(e => {
-        return e.split(",");
-    });
-
-    for (var i = 1; i < newArr.length; i++){
-        finalArr.push(
-            {
-                Name: `${newArr[i][0]}`,
-                External: `${newArr[i][1]}`,
-                Spawn: `${newArr[i][2]}`,
-                Rooms: `${newArr[i][3]}`,
-                Orientation: `${Math.floor(Math.random()*4) + 1}`,
-                Zombies: `${zombieCreator()}`
-            }
-        )
+    if(ourCoin % 2 === 0){
+        tileInfo = fs.readFileSync('./array1.csv',"utf8");
+        return getPath(tileInfo);
     }
-return finalArr;
+    else{
+        tileInfo = fs.readFileSync('./array2.csv',"utf8");
+        return getPath(tileInfo);
+    }
 }
 
 // tileGrabber gets handed a length, then shuffles and returns a number of random tiles equal to the length it was handed
@@ -137,25 +139,35 @@ function tileGrabber(length){
 
 // Attempts to generate an escape mission path, if that path length is less than 3 or larger than 7, it generates a new path and pipes the
 // generated path to tileGenerator.
-function generateEscapePath(){
+function generateEscapePath(detailObject,openTiles){
     let missionPath = [];
-    let mission = "";
-    let missionCounter = 1;
+    let possibleTokens = 0;
+    let cureCount = detailObject.Cure;
 
-    while(mission !== "Escape"){
-        let tempMisson = missionType();
+    while(possibleTokens !== cureCount){
+        let tempMission = missionType();
+        if(tempMission === "Search" || tempMission === "Neutralize"){
+            possibleTokens++;
+            missionPath.push(tempMission);
+        }
+        else if (tempMission === "Rescue"){
+            possibleTokens++;
+            let theRescue = generateRescue(detailObject);
+            missionPath.push(`${tempMission} ${theRescue}`);
+        }
+        else{
+            missionPath.push(tempMission);
+        }
+    }
+     return tileGenerator(missionPath);
+}
 
-        missionPath.push(tempMisson);
-        mission = tempMisson;
-        missionCounter++;
-    }
+// FIX THIS, ITS RETURNING WITH WEAPONS!!!!!!!
+function generateRescue(detailObject){
+    let allPeople = fs.readFileSync('./characters.csv',"utf8");
+    let party = detailObject.Party.split(",");
+    
 
-    if(missionPath.length > 7 || missionPath.length < 3){
-        return generateEscapePath();
-    }
-    else{
-        return tileGenerator(missionPath);
-    }
 }
 
 function zombieCreator(){
@@ -164,16 +176,84 @@ function zombieCreator(){
     switch(true){
 
         case randomNum <= 60:
-            return `Walkers: ${(Math.floor(Math.random()*5))}`;
+            return `Walkers: ${(Math.floor(Math.random()*5)+1)}`;
             break;
 
         case (randomNum > 60 && randomNum <= 85):
-            return `Fatties: ${(Math.floor(Math.random()*3))}`;
+            return `Fatties: ${(Math.floor(Math.random()*3)+1)}`;
             break;
 
         case (randomNum > 85 && randomNum <= 100):
-            return `Runners: ${(Math.floor(Math.random()*2))}`;
+            return `Runners: ${(Math.floor(Math.random()*2)+1)}`;
             break;
+
+        default: console.log("ERROR");
+    }
+}
+
+function getPath(tileInfo){
+    let finalTileInfo = [];
+
+    tileInfo = tileInfo.split("\r\n");
+
+    let tileFrame = tileInfo.map(e => {
+        return e.split(",");
+    });
+
+    for (var i = 1; i < tileFrame.length; i++){
+        let tempZombies = zombieCreator();
+        finalTileInfo.push(
+            {
+                Name: `${tileFrame[i][0]}`,
+                External: `${tileFrame[i][1]}`,
+                Spawn: `${tileFrame[i][2]}`,
+                Rooms: `${tileFrame[i][3]}`,
+                sisterTile: `${tileFrame[i][4]}`,
+                Orientation: `${Math.floor(Math.random()*4) + 1}`,
+                Zombies: `${tempZombies}`
+
+            }
+        )
+    }
+    return finalTileInfo;
+}
+
+function weaponType(){
+    let randomNum = (Math.floor(Math.random()*100) + 1);
+    // pan, pistol, fireaxe, crowbar, shotgun, rifle, machete, baseball bat
+    switch(true){
+
+        case randomNum <= 15:
+            return `Pan`;
+            break;
+
+        case (randomNum > 15 && randomNum <= 25):
+            return `Pistol`;
+            break;
+
+        case (randomNum > 25 && randomNum <= 41):
+            return `Fireaxe`;
+            break;
+
+        case (randomNum > 41 && randomNum <= 57):
+            return `Crowbar`;
+            break;
+
+        case (randomNum > 57 && randomNum <= 73):
+            return `Machete`;
+            break;
+
+        case (randomNum > 73 && randomNum <= 90):
+            return `Baseball Bat`;
+            break;
+
+        case (randomNum > 90 && randomNum <= 95):
+            return `Shotgun`;
+            break;
+
+        case (randomNum > 95 && randomNum <= 100):
+            return `Rifle`;
+            break;    
 
         default: console.log("ERROR");
     }
