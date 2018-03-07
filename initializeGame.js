@@ -33,7 +33,7 @@ Your mission path is:\r\n${missionPath}\r\n
 You need ${detailObject.Cure} objectives to find the cure!`
 }
 
-
+ 
 function startingTile(){
     let tileArray = ["5D","4D","4B","5B","6B","2B",
                     "5M","4M","3M","6M","1M","8M",
@@ -48,7 +48,7 @@ function startingParty(groupSize){
     let size = groupSize;
     let charArray = ["Josh","Wanda","Ned","Amy","Phil","Doug",
                     "Mary","Ben","Bones",
-                    "Padre","Neema","Derek","Elsa","Raoul"];
+                    "Johnson","Neema","Derek","Elsa","Raoul"];
     let weapons = [];
     let partyWithWeapons = [];
     let party = shuffle(charArray).slice(0,size);
@@ -76,8 +76,12 @@ function missionType(){
             return "Neutralize";
             break;
 
-        case (randomNum > 45 && randomNum <= 65):
+        case (randomNum > 45 && randomNum <= 55):
             return "Rescue";
+            break;
+
+        case (randomNum > 55 && randomNum <= 65):
+            return "Battle Royale";
             break;
 
         case (randomNum > 65 && randomNum <= 75):
@@ -109,16 +113,18 @@ function cureAmount(min,max){
 function tileGenerator(missionPath,openTiles){
     let joinedPath = [];
     let token = "";
+    let enemies = "";
     let pathTiles = tileGrabber((missionPath.length),openTiles)
 
     for (var i = 0; i < missionPath.length; i++){
-        if(missionPath[i].substring(0,3) === "Neu" || missionPath[i].substring(0,3) === "Sea"){
+        if(missionPath[i].substring(0,3) === "Neu" || missionPath[i].substring(0,3) === "Sea" || missionPath[i].substring(0,3) === "Bat"){
             token = ((Math.floor(Math.random()*(pathTiles[i].Rooms)) + 1));
         }
         else{
             token = "N/A";
         }
-        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Token Location: ${token}, Orientation: ${pathTiles[i].Orientation}, Zombies: ${pathTiles[i].Zombies}\r\n`);
+        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Token Location: ${token}, Orientation: ${pathTiles[i].Orientation}, Zombie Spawn: ${(Math.floor(Math.random()*(pathTiles[i].Spawn))+1)}, Zombies: ${pathTiles[i].Zombies}
+        \r\n`);
     }
     return joinedPath.join("");
 }
@@ -149,6 +155,7 @@ function tileGrabber(length){
 function generateEscapePath(detailObject,openTiles){
     let missionPath = [];
     let possibleTokens = 0;
+    let possibleEnemies = (detailObject.Party.split(",").length)-1;
     let cureCount = detailObject.Cure;
 
     while(possibleTokens !== cureCount){
@@ -157,8 +164,14 @@ function generateEscapePath(detailObject,openTiles){
             possibleTokens++;
             missionPath.push(tempMission);
         }
+        else if(tempMission === "Battle Royale"){
+            let theEnemies = generatePeople(detailObject,possibleEnemies)
+            theEnemies = theEnemies.join(` with a ${enemyWeapon()} and a ${enemyWeapon()} for `);
+            possibleTokens++;
+            missionPath.push(`${tempMission} against ${theEnemies}`);
+        }
         else if (tempMission === "Rescue"){
-            let theRescue = generateRescue(detailObject);
+            let theRescue = generatePeople(detailObject,1);
             missionPath.push(`${tempMission} ${theRescue}`);
         }
         else{
@@ -169,7 +182,7 @@ function generateEscapePath(detailObject,openTiles){
 }
 
 
-function generateRescue(detailObject){
+function generatePeople(detailObject,number){
     let allPeople = fs.readFileSync('./characters.csv',"utf8").split(",");
     let party = detailObject.Party.split(",");
     let possibleRescues = [];
@@ -191,7 +204,7 @@ function generateRescue(detailObject){
             possibleRescues.push(allPeople[i]);
         }
     }
-    return shuffle(possibleRescues).slice(0,1);
+    return shuffle(possibleRescues).slice(0,number);
 }
 
 function zombieCreator(){
@@ -277,6 +290,88 @@ function weaponType(){
 
         case (randomNum > 95 && randomNum <= 100):
             return `Rifle`;
+            break;    
+
+        default: console.log("ERROR");
+    }
+}
+
+function enemyWeapon(){
+    let randomNum = (Math.floor(Math.random()*100) + 1);
+
+    switch(true){
+
+        case randomNum <= 10:
+            return `Pan`;
+            break;
+
+        case (randomNum > 10 && randomNum <= 25):
+            return `Pistol`;
+            break;
+
+        case (randomNum > 25 && randomNum <= 41):
+            return `SMG`;
+            break;
+
+        case (randomNum > 41 && randomNum <= 57):
+            return `Sawed-Off Shotgun`;
+            break;
+
+        case (randomNum > 57 && randomNum <= 68):
+            return `Machete`;
+            break;
+
+        case (randomNum > 68 && randomNum <= 77):
+            return `Rifle`;
+            break;
+
+        case (randomNum > 77 && randomNum <= 90):
+            return `Shotgun`;
+            break;
+
+        case (randomNum > 90 && randomNum <= 100):
+            return `${mvpWeapon()}`;
+            break;    
+
+        default: console.log("ERROR");
+    }
+}
+
+function mvpWeapon(){
+    let randomNum = (Math.floor(Math.random()*100) + 1);
+    // Evil Twins, Ma's Shotgun, Golden Ak-47, Pink M4, Daisho, Spas-12, Desert Eagle, Tompson
+    switch(true){
+
+        case randomNum <= 13:
+            return `Evil Twins`;
+            break;
+
+        case (randomNum > 13 && randomNum <= 26):
+            return `Ma's Shotgun`;
+            break;
+
+        case (randomNum > 26 && randomNum <= 39):
+            return `Golden AK-47`;
+            break;
+
+        case (randomNum > 39 && randomNum <= 52):
+            return `Pink M4`;
+            break;
+
+        case (randomNum > 52 && randomNum <= 65):
+            return `Daisho`;
+            break;
+
+        case (randomNum > 65 && randomNum <= 78):
+            return `SPAS-12`;
+            break;
+
+        case (randomNum > 78 && randomNum <= 91):
+            return `Desert Eagle`;
+            break;
+
+        case (randomNum > 91 && randomNum <= 100):
+            return `Thompson`;
             break;    
 
         default: console.log("ERROR");
