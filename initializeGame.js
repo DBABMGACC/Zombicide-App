@@ -47,8 +47,8 @@ function startingTile(){
 function startingParty(groupSize){
     let size = groupSize;
     let charArray = ["Josh","Wanda","Ned","Amy","Phil","Doug",
-                    "Angry Mary","Red Cap Ben","Bones",
-                    "Padre Johnson","Neema","Derek","Elsa","Raoul"];
+                    "Mary","Ben","Bones",
+                    "Padre","Neema","Derek","Elsa","Raoul"];
     let weapons = [];
     let partyWithWeapons = [];
     let party = shuffle(charArray).slice(0,size);
@@ -108,10 +108,17 @@ function cureAmount(min,max){
 // by iterating over the length of the path
 function tileGenerator(missionPath,openTiles){
     let joinedPath = [];
+    let token = "";
     let pathTiles = tileGrabber((missionPath.length),openTiles)
 
     for (var i = 0; i < missionPath.length; i++){
-        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Orientation: ${pathTiles[i].Orientation}, Zombies: ${pathTiles[i].Zombies}\r\n`);
+        if(missionPath[i].substring(0,3) === "Neu" || missionPath[i].substring(0,3) === "Sea"){
+            token = ((Math.floor(Math.random()*(pathTiles[i].Rooms)) + 1));
+        }
+        else{
+            token = "N/A";
+        }
+        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Token Location: ${token}, Orientation: ${pathTiles[i].Orientation}, Zombies: ${pathTiles[i].Zombies}\r\n`);
     }
     return joinedPath.join("");
 }
@@ -151,7 +158,6 @@ function generateEscapePath(detailObject,openTiles){
             missionPath.push(tempMission);
         }
         else if (tempMission === "Rescue"){
-            possibleTokens++;
             let theRescue = generateRescue(detailObject);
             missionPath.push(`${tempMission} ${theRescue}`);
         }
@@ -162,12 +168,30 @@ function generateEscapePath(detailObject,openTiles){
      return tileGenerator(missionPath);
 }
 
-// FIX THIS, ITS RETURNING WITH WEAPONS!!!!!!!
-function generateRescue(detailObject){
-    let allPeople = fs.readFileSync('./characters.csv',"utf8");
-    let party = detailObject.Party.split(",");
-    
 
+function generateRescue(detailObject){
+    let allPeople = fs.readFileSync('./characters.csv',"utf8").split(",");
+    let party = detailObject.Party.split(",");
+    let possibleRescues = [];
+    let splitParty = party.map(e => {
+        return e.split(" ");
+    })
+    let filterParty = splitParty.map(e => {
+        return e[0].replace(/(?:\\[rn]|[\r\n]+)+/g, "");
+    })
+    
+    allPeople = allPeople.toString().replace( /(?:\\[rn]|[\r\n]+)+/g, "," ).split(",");
+
+    
+    for(var i = 0; i < allPeople.length; i++){
+        if(allPeople[i] === filterParty[0] || allPeople[i] === filterParty[1] || allPeople[i] === filterParty[2]){
+            continue;
+        }
+        else{
+            possibleRescues.push(allPeople[i]);
+        }
+    }
+    return shuffle(possibleRescues).slice(0,1);
 }
 
 function zombieCreator(){
@@ -176,15 +200,15 @@ function zombieCreator(){
     switch(true){
 
         case randomNum <= 60:
-            return `Walkers: ${(Math.floor(Math.random()*5)+1)}`;
+            return `${(Math.floor(Math.random()*5)+1)} Walkers`;
             break;
 
         case (randomNum > 60 && randomNum <= 85):
-            return `Fatties: ${(Math.floor(Math.random()*3)+1)}`;
+            return `${(Math.floor(Math.random()*3)+1)} Fatties`;
             break;
 
         case (randomNum > 85 && randomNum <= 100):
-            return `Runners: ${(Math.floor(Math.random()*2)+1)}`;
+            return `${(Math.floor(Math.random()*2)+1)} Runners`;
             break;
 
         default: console.log("ERROR");
@@ -220,7 +244,7 @@ function getPath(tileInfo){
 
 function weaponType(){
     let randomNum = (Math.floor(Math.random()*100) + 1);
-    // pan, pistol, fireaxe, crowbar, shotgun, rifle, machete, baseball bat
+
     switch(true){
 
         case randomNum <= 15:

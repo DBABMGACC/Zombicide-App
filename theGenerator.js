@@ -74,43 +74,6 @@ function generateEscapePath(){
     }
 }
 
-function missionType(){
-    let randomNum = (Math.floor(Math.random()*100) + 1);
-
-    switch(true){
-
-        case randomNum <= 25:
-            return "Search";
-            break;
-
-        case (randomNum > 25 && randomNum <= 45):
-            return "Neutralize";
-            break;
-
-        case (randomNum > 45 && randomNum <= 65):
-            return "Rescue";
-            break;
-
-        case (randomNum > 65 && randomNum <= 75):
-            return "Barricade";
-            break;
-
-        case (randomNum > 75 && randomNum <= 80):
-            return "Survive";
-            break;
-
-        case (randomNum > 80 && randomNum <= 85):
-            return "Nest";
-            break;
-
-        case (randomNum > 85):
-            return "Escape";
-            break;
-
-        default: console.log("ERROR");
-    }
-}
-
 function zombieCreator(){
     let randomNum = (Math.floor(Math.random()*100) + 1);
 
