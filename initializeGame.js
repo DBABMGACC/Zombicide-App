@@ -14,7 +14,7 @@ console.log(newGame(detailObject,missionPath));
 function detailGenerator(){
    let detailObject = 
         {
-            Party: startingParty(3),
+            Party: startingParty(4),
             Mission: missionType(),
             Cure: cureAmount(3,6)
         }  
@@ -55,31 +55,31 @@ function missionType(){
             return "Search";
             break;
 
-        case (randomNum > 25 && randomNum <= 45):
+        case (randomNum > 25 && randomNum <= 40):
             return "Neutralize";
             break;
 
-        case (randomNum > 45 && randomNum <= 55):
+        case (randomNum > 40 && randomNum <= 50):
             return "Rescue";
             break;
 
-        case (randomNum > 55 && randomNum <= 65):
+        case (randomNum > 50 && randomNum <= 60):
             return "Battle Royale";
             break;
 
-        case (randomNum > 65 && randomNum <= 75):
+        case (randomNum > 60 && randomNum <= 70):
             return "Barricade";
             break;
 
-        case (randomNum > 75 && randomNum <= 80):
+        case (randomNum > 70 && randomNum <= 75):
             return "Survive";
             break;
 
-        case (randomNum > 80 && randomNum <= 85):
+        case (randomNum > 75 && randomNum <= 80):
             return "Nest";
             break;
 
-        case (randomNum > 85):
+        case (randomNum > 80):
             return "Escape";
             break;
 
@@ -100,7 +100,7 @@ function tileGenerator(missionPath){
     let pathTiles = tileGrabber(missionPath);
     
     for (var i = 0; i < missionPath.length; i++){
-        if(missionPath[i].substring(0,3) === "Neu" || missionPath[i].substring(0,3) === "Sea" || missionPath[i].substring(0,3) === "Bat"){
+        if(missionPath[i].substring(0,3) === "Neu" || missionPath[i].substring(0,3) === "Sea" || missionPath[i].substring(0,3) === "Bat" || missionPath[i].substring(0,3) === "Esc"){
             token = ((Math.floor(Math.random()*(pathTiles[i][0].Rooms)) + 1));
         }
         else{
@@ -111,32 +111,17 @@ function tileGenerator(missionPath){
             \r\n`)
         }
         else{
-            joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i][0].Name}, Token Location: ${token}, Orientation: ${pathTiles[i][0].Orientation}, Zombie Spawn Location: ${(Math.floor(Math.random()*(pathTiles[i][0].Spawn))+1)}, Zombies: ${pathTiles[i][0].Zombies}
+            joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i][0].Name}, Token Location: ${token}, Connection: ${(Math.floor(Math.random()*20) + 1)}, Orientation: ${pathTiles[i][0].Orientation}, Zombie Spawn Location: ${(Math.floor(Math.random()*(pathTiles[i][0].Spawn))+1)}, Zombies: ${pathTiles[i][0].Zombies}
             \r\n`);
         }
     }
     return joinedPath.join("");
 }
 
-// Reads the CSV containing all tile's info, and splits each tile into an object we are able to work with, all tile properties included
-function getTiles(){
-    let ourCoin = ((Math.floor(Math.random()*100) + 1))
-    let tiles = "";
-
-    if(ourCoin % 2 === 0){
-        tiles = fs.readFileSync('./array1.csv',"utf8");
-        return getTileInfo(tiles);
-    }
-    else{
-        tiles = fs.readFileSync('./array2.csv',"utf8");
-        return getTileInfo(tiles);
-    }
-}
-
 // tileGrabber gets handed a length, then shuffles and returns a number of random tiles equal to the length it was handed
 function tileGrabber(missionPath){
     let missionLength = missionPath.length;
-    let tileArray = fs.readFileSync('./arrayTest.csv',"utf8");
+    let tileArray = fs.readFileSync('./Tiles.csv',"utf8");
     tileArray = getTileInfo(tileArray);
     let x;
     let tempTiles = [];
@@ -150,9 +135,12 @@ function tileGrabber(missionPath){
             return (tempTiles.indexOf(e.Name) === -1 && tempTiles.indexOf(e.SisterTile) === -1);
         })
     }
-    console.log("FTA Length: "+finalTileArray.length)
+    
+    tileArray.map(e => {
+        console.log(`Name: ${e.Name}, Spawn: ${e.Spawn}, Rooms: ${e.Rooms}, Orientation: ${e.Orientation}, Zombies: ${e.Zombies}`);
+    })
+
     return finalTileArray;
-   // return shuffle(tileArray).slice(0,missionLength);
 }
 
 // Attempts to generate an escape mission path, if that path length is less than 3 or larger than 7, it generates a new path and pipes the
@@ -188,11 +176,17 @@ function generateEscapePath(detailObject){
             let theRescue = generatePeople(detailObject,1);
             missionPath.push(`${tempMission} ${theRescue}`);
         }
+        else if(tempMission === "Survive"){
+            missionPath.push(`${tempMission} ${(Math.floor(Math.random()*5) + 2)} rounds`)
+        }
+        else if(tempMission === "Escape"){
+            possibleTokens++;
+            missionPath.push(tempMission);
+        }
         else{
             missionPath.push(tempMission);
         }
     }
-    console.log(missionPath);
      return tileGenerator(missionPath);
 }
 
