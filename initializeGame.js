@@ -16,32 +16,16 @@ function detailGenerator(){
    let detailObject = 
         {
             Party: startingParty(3),
-            Tile: startingTile(),
             Mission: missionType(),
             Cure: cureAmount(3,6)
         }  
     return detailObject;
 }
 
-
-
-
 function newGame(detailObject,myPath){
 return `Your starting party is: ${detailObject.Party.replace(/,/g, '')}\r\n
-Your starting tile is: ${detailObject.Tile}\r\n
 Your mission path is:\r\n${missionPath}\r\n
 You need ${detailObject.Cure} objectives to find the cure!`
-}
-
- 
-function startingTile(){
-    let tileArray = ["5D","4D","4B","5B","6B","2B",
-                    "5M","4M","3M","6M","1M","8M",
-                    "2M","7M","5F","7B","2C","6C",
-                    "4C","5C","1B","3B","1C","3C",
-                    "4E","5E"];
-
-    return shuffle(tileArray).slice(0,1);
 }
 
 function startingParty(groupSize){
@@ -114,7 +98,7 @@ function tileGenerator(missionPath,openTiles){
     let joinedPath = [];
     let token = "";
     let enemies = "";
-    let pathTiles = tileGrabber((missionPath.length),openTiles)
+    let pathTiles = tileGrabber((missionPath.length+1))
 
     for (var i = 0; i < missionPath.length; i++){
         if(missionPath[i].substring(0,3) === "Neu" || missionPath[i].substring(0,3) === "Sea" || missionPath[i].substring(0,3) === "Bat"){
@@ -123,8 +107,14 @@ function tileGenerator(missionPath,openTiles){
         else{
             token = "N/A";
         }
-        joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Token Location: ${token}, Orientation: ${pathTiles[i].Orientation}, Zombie Spawn: ${(Math.floor(Math.random()*(pathTiles[i].Spawn))+1)}, Zombies: ${pathTiles[i].Zombies}
-        \r\n`);
+        if(i === 0){
+            joinedPath.push(`Starting Tile: ${pathTiles[0].Name}
+            \r\n`)
+        }
+        else{
+            joinedPath.push(`Mission: ${missionPath[i]}, Tile: ${pathTiles[i].Name}, Token Location: ${token}, Orientation: ${pathTiles[i].Orientation}, Zombie Spawn Location: ${(Math.floor(Math.random()*(pathTiles[i].Spawn))+1)}, Zombies: ${pathTiles[i].Zombies}
+            \r\n`);
+        }
     }
     return joinedPath.join("");
 }
@@ -183,27 +173,20 @@ function generateEscapePath(detailObject,openTiles){
 
 
 function generatePeople(detailObject,number){
-    let allPeople = fs.readFileSync('./characters.csv',"utf8").split(",");
+    let allPeople = fs.readFileSync('./characters.csv',"utf8").split("\r\n");
     let party = detailObject.Party.split(",");
     let possibleRescues = [];
-    let splitParty = party.map(e => {
-        return e.split(" ");
-    })
-    let filterParty = splitParty.map(e => {
-        return e[0].replace(/(?:\\[rn]|[\r\n]+)+/g, "");
-    })
     
-    allPeople = allPeople.toString().replace( /(?:\\[rn]|[\r\n]+)+/g, "," ).split(",");
-
-    
-    for(var i = 0; i < allPeople.length; i++){
-        if(allPeople[i] === filterParty[0] || allPeople[i] === filterParty[1] || allPeople[i] === filterParty[2]){
-            continue;
-        }
-        else{
-            possibleRescues.push(allPeople[i]);
-        }
-    }
+        let splitParty = party.map(e => {
+            return e.split(" ");
+        })
+        let filterParty = splitParty.map(e => {
+            return e[0].replace(/(?:\\[rn]|[\r\n]+)+/g, "");
+        })
+        
+        possibleRescues = allPeople.filter( e=> {
+        return (filterParty.indexOf(e) === -1);
+        })
     return shuffle(possibleRescues).slice(0,number);
 }
 

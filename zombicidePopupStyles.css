@@ -13,25 +13,55 @@ blockquote:after,blockquote:before,q:after,q:before{content:'';content:none}tabl
     border-radius: 8px;
     margin-top: 20px;
     box-shadow: 0px 1px 3px black;
-    font-family: "Calibri";
+    font-family: "Arial";
 }
 
-.firstHeader {
+.playerButton {
+    position: relative;
     width: 100%;
-    font-size: 36px;
-    border-bottom: 2px dotted #0F0F0F;
+    max-width: 400px;
+}
+
+.playerButton img {
+    width: 200%;
+    height: auto;
+    text-align: center;
+}
+
+.playerButton .btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    background-color: transparent;
+    color: black;
+    font-size: 50px;
+    padding: 100px 200px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.headerStyle {
+    width: 100%;
+    font-size: 50px;
     padding-bottom: 14px;
+    text-align: center;
     overflow: auto;
     font-family: "Creepster";
     color: #54C571;
 }
 
-.partyInfo {
+.aboveButtonText {
+    text-align: center;
     font-size: 20px;
-    font-weight: bold;
+    color: black;
 }
 
-.missionInfo {
+p {
+    text-align: center;
     font-size: 20px;
-    font-weight: bold;
+    color: #54C571;
 }
